@@ -1,0 +1,31 @@
+#!/bin/bash
+NULL="0000000000000000000000000000000000000000"
+export BRANCH=${1##*/}
+export NEW_HASH=$3
+
+if [[ "$2" == "$NULL" ]]; then
+    # branch being created
+    export AGAINST=$(git merge-base master $3)
+    # This assumes that the ultimate source and destination of all branches is master. May not be true for all work flows. You may choose to use the "empty tree object" hash.
+elif [[ "$3" == "$NULL" ]]; then
+    # branch being deleted
+    echo "Looks like you are deleting branch '$BRANCH'. If you need to restore it, try using hash: $2"
+    exit 0
+else
+    export AGAINST=$2
+fi
+export GIT_DIFF="git diff "'$*'" $AGAINST $3"
+
+RETURN_VALUE=0
+# The following pattern should allow the developer to see/fix all errors in one shot
+$GIT_DIR/hooks/update.restrictions.sh || RETURN_VALUE=$?
+#$GIT_DIR/hooks/pre-commit.markers.sh || RETURN_VALUE=$?
+$GIT_DIR/hooks/pre-commit.tabs.sh || RETURN_VALUE=$?
+$GIT_DIR/hooks/pre-commit.pyc.sh || RETURN_VALUE=$?
+$GIT_DIR/hooks/pre-commit.egg-info.sh || RETURN_VALUE=$?
+
+if [[ $RETURN_VALUE != 0 ]]; then
+    echo "Aborting commit due to previous errors."
+    echo
+    exit $RETURN_VALUE
+fi

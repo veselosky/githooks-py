@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Called by "git commit" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message if
+# it wants to stop the commit.
+
+RETURN_VALUE=0
+# The following pattern should allow the developer to see/fix all errors in one shot
+$GIT_DIR/hooks/pre-commit.markers.sh || RETURN_VALUE=$?
+$GIT_DIR/hooks/pre-commit.tabs.sh || RETURN_VALUE=$?
+$GIT_DIR/hooks/pre-commit.pyc.sh || RETURN_VALUE=$?
+$GIT_DIR/hooks/pre-commit.egg-info.sh || RETURN_VALUE=$?
+
+if [[ $RETURN_VALUE != 0 ]]; then
+    echo "Aborting commit due to previous errors."
+    echo
+    exit $RETURN_VALUE
+fi

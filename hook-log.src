@@ -1,0 +1,1 @@
+echo $0 $* >>$GIT_DIR/$(basename $0).log; env >>$GIT_DIR/$(basename $0).log

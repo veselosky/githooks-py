@@ -1,2 +1,2 @@
 # githooks-py
-useful githooks for python development
+useful(?) git-hooks for python development

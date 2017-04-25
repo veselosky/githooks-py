@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# Called by "git commit" with the name of the file that has the
+# commit message, followed by the description of the commit
+# message's source.  The hook's purpose is to edit the commit
+# message file.  If the hook fails with a non-zero status,
+# the commit is aborted.
+
+# the gnu-sed way
+echo | sed -r 'p' 2>/dev/null 1>&2 && ESED='sed -r'
+# the BSD sed way
+echo | sed -E 'p' 2>/dev/null 1>&2 && ESED='sed -E'
+
+BRANCH=$(sed 's,ref:.refs/heads/,,' $GIT_DIR/HEAD)
+TICKET=$(echo $BRANCH | $ESED '/[a-zA-Z]{1,}-[0-9]{1,}/!d;s/^([a-zA-Z]{1,}-[0-9]{1,}).*/\1/')
+echo $BRANCH $TICKET > /tmp/ono
+COMMIT_EDITMSG=$GIT_DIR/COMMIT_EDITMSG
+#REQUIRE_BRACKETS=1
+
+awk -v branch="$BRANCH" -v ticket="$TICKET" -f - $COMMIT_EDITMSG > $COMMIT_EDITMSG.orig << 'AWK'
+NR==1 {
+    tag="["ticket"]"
+    tail="branch: "branch
+    if(length(ticket)>0){
+        if($1!=tag){
+            printf "["ticket"] "
+        }
+        #print
+        # TODO: if moving print outside the nested conditionals turns out to be good, consolidate the conditionals
+    }
+        print
+}
+done!=1 && /^#/ {
+    done=1
+    if(prev1!=tail && prev2!=tail){
+        print tail
+    }
+}
+NR>1{
+    if(NF>0 || prev1!=tail){
+        # All this "prev" stuff is about not trampling amended commits.
+        prev2=prev1
+        prev1=$1" "$2
+        print
+    }
+}
+END {
+    if(done!=1){
+        print tail
+    }
+}
+AWK
+
+# Make a copy of this non-empty commit message so it can be compared by commit-msg.unchanged.sh in the commit-msg hook.
+cp "$COMMIT_EDITMSG.orig" "$COMMIT_EDITMSG" # reversed because of the way awk is used above

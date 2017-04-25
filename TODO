@@ -1,0 +1,23 @@
+1. Create a collection of small scripts that can be called by any of git's hooks to accomplish focused tasks/checks. The tasks/checks should include:
+√  a. reject merge markers (and trailing whitespace)
+√  b. reject tab indention of *.py files
+√  c. reject use of commit -m
+√  d. reject unchanged COMMIT_EDITMSG
+x  e. reject unchanged MERGE_MSG
+   f. reject unchanged MERGE_MSG for conflicted merges
+   g. reject merges
+√  h. reject egg_info
+√  i. insert branch name into COMMIT_EDITMSG
+x  j. insert branch name into MERGE_MSG
+√  k. insert Ticket ID into COMMIT_EDITMSG
+x  l. insert Ticket ID into MERGE_MSG
+√  m. reject commits to specific branches by unauthorized users
+~  n. reject migrations with number conflicts
+√  o. reject pyc files
+2. Create script (maybe fab task) to install the suggest local and remote hooks into a repo's .git/hook dir.
+√  a. add a script to this project
+   b. create a fab task that runs "a"
+
+√ done
+x not possible
+~ in progress
